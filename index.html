@@ -11,6 +11,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700;800&family=Kanit:ital,wght@0,300;0,400;0,600;0,700;0,800&family=Amiri:wght@700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- MQTT Library -->
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 
   <style>
     * {
@@ -228,7 +230,7 @@
     }
 
     /* ==========================================
-       3. PAYMENT STATE: การ์ดถุงเงินโมเดิร์น สวย สมมาตร
+       3. PAYMENT STATE: การ์ดถุงเงินโมเดิร์น
        ========================================== */
     #screen-payment {
       background: radial-gradient(circle at center, #0d1527 0%, #040711 100%);
@@ -254,7 +256,6 @@
       animation: popCard 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    /* หัวการ์ดสไตล์ Thai QR Payment */
     .thung-header {
       width: 100%;
       background: #003764;
@@ -302,7 +303,6 @@
       color: #ffffff;
     }
 
-    /* ตัว QR Code ขนาดใหญ่เต็มกรอบ */
     .thung-qr-body {
       padding: 18px 24px 8px 24px;
       background: #ffffff;
@@ -312,7 +312,6 @@
       width: 100%;
     }
 
-    /* ชื่อร้านค้าเด่นชัด */
     .shop-title-area {
       text-align: center;
       padding: 4px 16px 12px 16px;
@@ -335,7 +334,6 @@
       font-weight: 500;
     }
 
-    /* กล่องแถบสรุปยอดเงิน สไตล์ถุงเงินแต่หรู คลีน ไม่ตัดแปะ */
     .thung-amount-strip {
       width: 100%;
       background: #f8fafc;
@@ -361,7 +359,7 @@
     .amount-digits {
       font-size: 2.8rem;
       font-weight: 800;
-      color: #003764; /* สีน้ำเงินเข้มภูมิฐาน คมชัด เข้ากับหัวการ์ด */
+      color: #003764;
       line-height: 1;
       font-variant-numeric: tabular-nums;
       letter-spacing: -0.5px;
@@ -373,7 +371,6 @@
       color: #64748b;
     }
 
-    /* ปุ่มบันทึก QR สไตล์แอปถุงเงิน */
     .btn-save-qr {
       display: flex;
       align-items: center;
@@ -568,11 +565,9 @@
     </div>
   </div>
 
-  <!-- 3. Payment Screen (สไตล์ถุงเงินโมเดิร์น สมมาตร สวย พรีเมียม) -->
+  <!-- 3. Payment Screen -->
   <div id="screen-payment" class="screen">
     <div class="thung-card">
-      
-      <!-- หัวการ์ด -->
       <div class="thung-header">
         <div class="thai-qr-logo-row">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -590,18 +585,15 @@
         </div>
       </div>
 
-      <!-- พื้นที่ QR Code ขนาดใหญ่เต็มกรอบ -->
       <div class="thung-qr-body">
         <div id="qrcode"></div>
       </div>
 
-      <!-- ชื่อร้านค้า -->
       <div class="shop-title-area">
         <div class="shop-name-label">อัสมี่ลูกชิ้นย่าง</div>
         <div class="shop-subtitle">สแกนชำระผ่านโมบายแบงก์กิ้งหรือกระเป๋าเงินดิจิทัล</div>
       </div>
 
-      <!-- แถบสรุปยอดเงินด้านล่างแบบถุงเงิน (สมมาตร คลีนตา) -->
       <div class="thung-amount-strip">
         <div class="amount-label-left">ยอดเงิน</div>
         <div class="amount-value-right">
@@ -609,10 +601,8 @@
           <span class="amount-baht-text">บาท</span>
         </div>
       </div>
-
     </div>
 
-    <!-- ปุ่มบันทึกภาพ QR ลงเครื่อง (สไตล์ถุงเงิน) -->
     <button id="btn-save-qr" class="btn-save-qr">
       <svg viewBox="0 0 24 24">
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -913,6 +903,42 @@
     window.addEventListener('resize', () => {
       if (currentState === STATES.PAYMENT && inputBuffer) {
         renderQR(parseFloat(inputBuffer));
+      }
+    });
+
+    // ==========================================
+    // MQTT SYNC: รอรับคำสั่งไร้สายจาก iPhone
+    // ==========================================
+    const MQTT_TOPIC = "asmi_cfd_pos_99/command";
+    const client = mqtt.connect('wss://broker.hivemq.com:8884/mqtt');
+
+    client.on('connect', () => {
+      console.log('✅ iPad Connected to MQTT Broker');
+      client.subscribe(MQTT_TOPIC);
+    });
+
+    client.on('message', (topic, message) => {
+      if (topic === MQTT_TOPIC) {
+        try {
+          const data = JSON.parse(message.toString());
+          if (data.type === "KEY") {
+            handleAction(data.key);
+          } else if (data.type === "DIRECT_PAY") {
+            initAudio();
+            inputBuffer = String(data.amount);
+            const num = parseFloat(inputBuffer);
+            if (num > 0) {
+              elPaymentAmountLabel.innerText = num.toLocaleString('th-TH');
+              renderQR(num);
+              speakAmount(num);
+              setScreenState(STATES.PAYMENT);
+            }
+          } else if (data.type === "SUCCESS") {
+            setScreenState(STATES.SUCCESS);
+          } else if (data.type === "RESET") {
+            setScreenState(STATES.IDLE);
+          }
+        } catch (err) {}
       }
     });
   </script>
