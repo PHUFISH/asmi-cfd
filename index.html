@@ -230,11 +230,11 @@
     }
 
     /* ==========================================
-       3. PAYMENT STATE: การ์ดถุงเงินโมเดิร์น
+       3. PAYMENT STATE: การ์ดถุงเงินขยายขอบกว้างสวยงามรอบด้าน
        ========================================== */
     #screen-payment {
       background: radial-gradient(circle at center, #0d1527 0%, #040711 100%);
-      padding: 16px;
+      padding: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -244,22 +244,23 @@
 
     .thung-card {
       background: #ffffff;
-      border-radius: 26px;
+      border-radius: 28px;
       overflow: hidden;
       box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85), 0 0 50px rgba(0, 55, 100, 0.4);
       display: flex;
       flex-direction: column;
       align-items: center;
-      width: 90vw;
-      max-width: 440px;
-      max-height: 85vh;
+      width: 92vw;
+      max-width: 540px; /* ขยายจาก 440px เพื่อให้รองรับ QR Code บน iPad สวยงาม ไม่เบียด */
+      max-height: 88vh;
       animation: popCard 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
+    /* ส่วนหัวการ์ด */
     .thung-header {
       width: 100%;
       background: #003764;
-      padding: 12px 20px 10px 20px;
+      padding: 14px 24px 12px 24px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -271,7 +272,7 @@
       align-items: center;
       gap: 8px;
       color: #ffffff;
-      font-size: 1.2rem;
+      font-size: 1.25rem;
       font-weight: 800;
       letter-spacing: 1.5px;
     }
@@ -286,7 +287,7 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      font-size: 0.8rem;
+      font-size: 0.82rem;
       color: #cbd5e1;
       font-weight: 600;
     }
@@ -303,8 +304,9 @@
       color: #ffffff;
     }
 
+    /* กล่องบรรจุ QR Code เว้นระยะรอบด้านกำลังดี สวยงาม */
     .thung-qr-body {
-      padding: 18px 24px 8px 24px;
+      padding: 22px 28px 12px 28px; /* ขยายระยะขอบขาวรอบ QR Code ให้กว้างขึ้นทั้ง บน ล่าง ซ้าย ขวา */
       background: #ffffff;
       display: flex;
       justify-content: center;
@@ -312,15 +314,16 @@
       width: 100%;
     }
 
+    /* ชื่อร้านค้า */
     .shop-title-area {
       text-align: center;
-      padding: 4px 16px 12px 16px;
+      padding: 4px 20px 14px 20px;
       background: #ffffff;
       width: 100%;
     }
 
     .shop-name-label {
-      font-size: 1.6rem;
+      font-size: 1.65rem;
       font-weight: 700;
       color: #0f172a;
       letter-spacing: -0.2px;
@@ -328,24 +331,25 @@
     }
 
     .shop-subtitle {
-      font-size: 0.85rem;
+      font-size: 0.88rem;
       color: #64748b;
-      margin-top: 2px;
+      margin-top: 3px;
       font-weight: 500;
     }
 
+    /* แถบสรุปยอดเงินด้านล่าง */
     .thung-amount-strip {
       width: 100%;
       background: #f8fafc;
       border-top: 1.5px solid #e2e8f0;
-      padding: 12px 24px;
+      padding: 14px 28px;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
 
     .amount-label-left {
-      font-size: 1.15rem;
+      font-size: 1.2rem;
       font-weight: 600;
       color: #475569;
     }
@@ -357,7 +361,7 @@
     }
 
     .amount-digits {
-      font-size: 2.8rem;
+      font-size: 3rem;
       font-weight: 800;
       color: #003764;
       line-height: 1;
@@ -366,11 +370,12 @@
     }
 
     .amount-baht-text {
-      font-size: 1.2rem;
+      font-size: 1.25rem;
       font-weight: 600;
       color: #64748b;
     }
 
+    /* ปุ่มบันทึก QR */
     .btn-save-qr {
       display: flex;
       align-items: center;
@@ -565,7 +570,7 @@
     </div>
   </div>
 
-  <!-- 3. Payment Screen -->
+  <!-- 3. Payment Screen (การ์ดขยายสมส่วนรองรับ QR Code เต็มที่) -->
   <div id="screen-payment" class="screen">
     <div class="thung-card">
       <div class="thung-header">
@@ -730,6 +735,7 @@
       } catch (e) {}
     }
 
+    // ฟังก์ชันเสียงพูด: สั้น กระชับ และสั่ง resume เสียงบน iOS
     function speakAmount(amount) {
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
@@ -738,6 +744,7 @@
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'th-TH';
         utterance.rate = 1.05;
+        window.speechSynthesis.resume();
         window.speechSynthesis.speak(utterance);
       }
     }
@@ -784,12 +791,16 @@
       return rebuilt + crc16(rebuilt);
     }
 
+    // คำนวณขนาด QR Code ให้สัมพันธ์กับการ์ดที่ขยายใหม่
+    // ขอบการ์ดจะเลยตัว QR Code ออกไปทุกทิศทาง พอดีสวยงาม
     function getCardQRSize() {
       const isPortrait = window.innerHeight > window.innerWidth;
       if (isPortrait) {
-        return Math.min(Math.floor(window.innerWidth * 0.70), Math.floor(window.innerHeight * 0.44));
+        // จำกัดขนาดไม่ให้เกิน 340px หรือ 65% จอ เพื่อให้มี Quiet Zone ขอบขาวล้อมรอบเสมอ
+        const maxAllowed = Math.min(window.innerWidth * 0.65, 340);
+        return Math.floor(Math.min(maxAllowed, window.innerHeight * 0.40));
       } else {
-        return Math.min(Math.floor(window.innerHeight * 0.48), Math.floor(window.innerWidth * 0.36));
+        return Math.floor(Math.min(window.innerHeight * 0.46, 320));
       }
     }
 
@@ -859,8 +870,8 @@
           if (num > 0) {
             elPaymentAmountLabel.innerText = num.toLocaleString('th-TH');
             renderQR(num);
-            speakAmount(num);
             setScreenState(STATES.PAYMENT);
+            setTimeout(() => speakAmount(num), 100);
           }
         }
         return;
@@ -907,7 +918,7 @@
     });
 
     // ==========================================
-    // MQTT SYNC: รอรับคำสั่งไร้สายจาก iPhone
+    // MQTT SYNC: จัดการรับคำสั่งข้ามเครื่องจาก iPhone
     // ==========================================
     const MQTT_TOPIC = "asmi_cfd_pos_99/command";
     const client = mqtt.connect('wss://broker.hivemq.com:8884/mqtt');
@@ -930,8 +941,10 @@
             if (num > 0) {
               elPaymentAmountLabel.innerText = num.toLocaleString('th-TH');
               renderQR(num);
-              speakAmount(num);
               setScreenState(STATES.PAYMENT);
+              setTimeout(() => {
+                speakAmount(num);
+              }, 150);
             }
           } else if (data.type === "SUCCESS") {
             setScreenState(STATES.SUCCESS);
