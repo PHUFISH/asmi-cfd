@@ -7,12 +7,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>อัสมี่ ลูกชิ้นย่างเตาถ่าน & ต้มแซ่บเนื้อ ฮาลาล</title>
   
-  <!-- Fonts: Kanit (300, 600, 900) & Amiri (Arabic) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,300;0,400;0,600;0,800;0,900;1,800&family=Amiri:wght@700&display=swap" rel="stylesheet">
-
-  <!-- Client-side QRCode Generator -->
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,300;0,400;0,600;0,700;0,800&family=Amiri:wght@700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
   <style>
@@ -29,11 +26,751 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background-color: #050403;
+      background-color: #08090d;
       color: #ffffff;
     }
 
     .screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.25s ease;
+      opacity: 0;
+      visibility: hidden;
+      z-index: 1;
+    }
+
+    .screen.active {
+      opacity: 1;
+      visibility: visible;
+      z-index: 2;
+    }
+
+    /* 1. IDLE STATE */
+    #screen-idle {
+      background: radial-gradient(circle at 50% 50%, #12141c 0%, #08090d 70%, #040507 100%);
+      cursor: pointer;
+    }
+
+    .nebula-glow {
+      position: absolute;
+      width: 650px;
+      height: 450px;
+      background: radial-gradient(ellipse, rgba(255, 140, 50, 0.08) 0%, rgba(255, 180, 50, 0.03) 45%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      filter: blur(60px);
+      pointer-events: none;
+    }
+
+    .stardust-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        radial-gradient(1.5px 1.5px at 20px 30px, #ffffff, rgba(0,0,0,0)),
+        radial-gradient(1.5px 1.5px at 40px 70px, rgba(255,255,255,0.7), rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 90px 40px, #ffd166, rgba(0,0,0,0)),
+        radial-gradient(1.5px 1.5px at 160px 120px, #ffffff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 230px 180px, rgba(255,255,255,0.8), rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 290px 80px, #ffffff, rgba(0,0,0,0));
+      background-size: 320px 240px;
+      opacity: 0.35;
+      animation: starTwinkle 7s ease-in-out infinite alternate;
+      pointer-events: none;
+    }
+
+    .signage-container {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      width: 90%;
+      max-width: 900px;
+      margin-top: -15px;
+      pointer-events: none;
+    }
+
+    .brand-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .brand-name {
+      font-size: 2.2rem;
+      font-weight: 300;
+      letter-spacing: 8px;
+      color: #e2e8f0;
+      text-transform: uppercase;
+    }
+
+    .halal-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(16, 75, 46, 0.45);
+      border: 1px solid rgba(212, 175, 55, 0.6);
+      border-radius: 30px;
+      padding: 3px 14px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+
+    .halal-arabic {
+      font-family: 'Amiri', serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #ffd166;
+      line-height: 1;
+      padding-bottom: 2px;
+    }
+
+    .halal-thai {
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      color: #ffffff;
+      text-transform: uppercase;
+    }
+
+    .hero-main {
+      font-size: 5rem;
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.5px;
+      color: #ffffff;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8), 0 0 35px rgba(255, 255, 255, 0.12);
+      margin-bottom: 8px;
+    }
+
+    .hero-secondary {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 2.7rem;
+      font-weight: 600;
+      color: #ffb703;
+      text-shadow: 0 4px 15px rgba(0, 0, 0, 0.7);
+    }
+
+    .hero-secondary .amp {
+      font-size: 2.2rem;
+      color: #94a3b8;
+      font-weight: 400;
+    }
+
+    .bottom-hint {
+      position: absolute;
+      bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.95rem;
+      color: #64748b;
+      pointer-events: none;
+    }
+
+    .payment-pill {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 3px 10px;
+      color: #94a3b8;
+      font-size: 0.85rem;
+    }
+
+    /* 2. INPUT STATE */
+    #screen-input {
+      background: radial-gradient(circle at center, #141b26 0%, #090d14 100%);
+    }
+
+    .input-label {
+      font-size: 2.2rem;
+      font-weight: 600;
+      color: #90e0ef;
+      margin-bottom: 22px;
+    }
+
+    .input-amount-wrapper {
+      display: flex;
+      align-items: baseline;
+      gap: 18px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 24px 68px;
+      border-radius: 28px;
+      border: 2px solid rgba(144, 224, 239, 0.35);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+    }
+
+    .input-amount {
+      font-size: 7.2rem;
+      font-weight: 800;
+      color: #ffffff;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .input-currency {
+      font-size: 2.5rem;
+      font-weight: 600;
+      color: #94a3b8;
+    }
+
+    /* ==========================================
+       3. PAYMENT STATE: TRUEMONEY YELLOW-ORANGE FRAME
+       ========================================== */
+    #screen-payment {
+      background: radial-gradient(circle at center, #15181f 0%, #080a0f 100%);
+      padding: 20px;
+    }
+
+    .payment-price-capsule {
+      background: rgba(255, 200, 59, 0.06);
+      border: 1.5px solid rgba(255, 183, 3, 0.6);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      border-radius: 22px;
+      padding: 8px 46px;
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .payment-title-small {
+      font-size: 1.1rem;
+      color: #ffd166;
+    }
+
+    .payment-amount-neon {
+      font-size: 4.6rem;
+      font-weight: 800;
+      color: #ffffff;
+      text-shadow: 0 0 20px rgba(255, 209, 102, 0.4);
+      line-height: 1.1;
+    }
+
+    /* การ์ดสไตล์ TrueMoney กรอบสีเหลือง-ส้ม */
+    .qr-card-container {
+      background: #ffffff;
+      border: 4px solid #ffbc00;
+      border-radius: 26px;
+      overflow: hidden;
+      box-shadow: 0 15px 45px rgba(255, 188, 0, 0.25), 0 20px 50px rgba(0, 0, 0, 0.85);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 320px;
+    }
+
+    .qr-card-header-tm {
+      width: 100%;
+      background: linear-gradient(135deg, #f58220 0%, #ffbc00 100%);
+      color: #ffffff;
+      padding: 10px 0;
+      text-align: center;
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    }
+
+    .qr-scanner-box {
+      padding: 16px;
+      background: #ffffff;
+    }
+
+    /* แถบระบุ PromptPay & TrueMoney ด้านล่าง */
+    .payment-brands-bar {
+      display: flex;
+      width: 100%;
+      border-top: 1.5px solid #f1f3f5;
+      background: #fafbfc;
+    }
+
+    .brand-tab {
+      flex: 1;
+      padding: 10px 0;
+      text-align: center;
+      font-size: 0.95rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .brand-tab.pp {
+      color: #003764;
+      border-right: 1.5px solid #e9ecef;
+      background: #f8fafc;
+    }
+
+    .brand-tab.tm {
+      color: #e65100;
+      background: #fffdf5;
+    }
+
+    .payment-status-hint {
+      margin-top: 16px;
+      font-size: 1.1rem;
+      color: #ffd166;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* 4. SUCCESS STATE */
+    #screen-success {
+      background: radial-gradient(circle at center, #0c2d1b 0%, #05140c 100%);
+    }
+
+    .success-icon {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: #2dc653;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 50px rgba(45, 198, 83, 0.5);
+      margin-bottom: 26px;
+    }
+
+    .success-icon svg {
+      width: 76px;
+      height: 76px;
+      stroke: #ffffff;
+      stroke-width: 4.5;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .success-text {
+      font-size: 3rem;
+      font-weight: 700;
+      color: #d8f3dc;
+    }
+
+    /* VIRTUAL NUMPAD CONTROLS */
+    #btn-numpad-toggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: rgba(40, 48, 65, 0.85);
+      border: 1.5px solid rgba(255, 255, 255, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 10000;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    }
+
+    #btn-numpad-toggle:active {
+      transform: scale(0.92);
+    }
+
+    #btn-numpad-toggle svg {
+      width: 26px;
+      height: 26px;
+      fill: #ffffff;
+      pointer-events: none;
+    }
+
+    #virtual-numpad-panel {
+      position: fixed;
+      bottom: 88px;
+      right: 20px;
+      background: #12161f;
+      border: 1.5px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 14px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9);
+      display: none;
+      grid-template-columns: repeat(3, 66px);
+      gap: 10px;
+      z-index: 10001;
+    }
+
+    #virtual-numpad-panel.show {
+      display: grid;
+    }
+
+    .vk-btn {
+      height: 54px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      color: #ffffff;
+      font-size: 1.4rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .vk-btn:active {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .vk-btn.fn-clear { color: #ff6b6b; font-size: 1.15rem; }
+    .vk-btn.fn-enter {
+      background: #2a9d8f;
+      color: #ffffff;
+      font-size: 1.1rem;
+      font-weight: 700;
+      border: none;
+    }
+    .vk-btn.fn-enter:active { background: #21867a; }
+
+    @keyframes starTwinkle {
+      0% { opacity: 0.25; }
+      100% { opacity: 0.55; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1. Idle Screen -->
+  <div id="screen-idle" class="screen active">
+    <div class="nebula-glow"></div>
+    <div class="stardust-layer"></div>
+    
+    <div class="signage-container">
+      <div class="brand-top-row">
+        <div class="brand-name">อัสมี่</div>
+        <div class="halal-badge">
+          <span class="halal-arabic">حلال</span>
+          <span class="halal-thai">ฮาลาล</span>
+        </div>
+      </div>
+
+      <div class="hero-main">ลูกชิ้นย่างเตาถ่าน</div>
+
+      <div class="hero-secondary">
+        <span class="amp">&</span>
+        <span>ต้มแซ่บเนื้อ</span>
+      </div>
+    </div>
+
+    <div class="bottom-hint">
+      <span>พร้อมรับชำระ</span>
+      <div class="payment-pill">พร้อมเพย์</div>
+      <div class="payment-pill">TrueMoney</div>
+    </div>
+  </div>
+
+  <!-- 2. Input Screen -->
+  <div id="screen-input" class="screen">
+    <div class="input-label">ยอดที่ต้องชำระ</div>
+    <div class="input-amount-wrapper">
+      <div id="display-amount" class="input-amount">0</div>
+      <div class="input-currency">บาท</div>
+    </div>
+  </div>
+
+  <!-- 3. Payment Screen (TrueMoney Yellow-Orange Frame) -->
+  <div id="screen-payment" class="screen">
+    <div class="payment-price-capsule">
+      <div class="payment-title-small">ยอดเงินที่ต้องชำระ</div>
+      <div id="payment-amount-label" class="payment-amount-neon">฿0.00</div>
+    </div>
+
+    <!-- การ์ดกรอบสไตล์ TrueMoney -->
+    <div class="qr-card-container">
+      <div class="qr-card-header-tm">
+        <span>สแกนจ่าย QR Code</span>
+      </div>
+      <div class="qr-scanner-box">
+        <div id="qrcode"></div>
+      </div>
+      <div class="payment-brands-bar">
+        <div class="brand-tab pp">PromptPay</div>
+        <div class="brand-tab tm">TrueMoney</div>
+      </div>
+    </div>
+
+    <div class="payment-status-hint">
+      ● กำลังรอการชำระเงิน...
+    </div>
+  </div>
+
+  <!-- 4. Success Screen -->
+  <div id="screen-success" class="screen">
+    <div class="success-icon">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+    </div>
+    <div class="success-text">ชำระเงินสำเร็จ</div>
+  </div>
+
+  <!-- ปุ่มเปิด Numpad บนหน้าจอ -->
+  <div id="btn-numpad-toggle" title="เปิดแป้นพิมพ์">
+    <svg viewBox="0 0 24 24">
+      <rect x="2" y="4" width="20" height="16" rx="3" stroke="currentColor" fill="none" stroke-width="1.8"/>
+      <circle cx="6" cy="9" r="1.2"/>
+      <circle cx="10" cy="9" r="1.2"/>
+      <circle cx="14" cy="9" r="1.2"/>
+      <circle cx="18" cy="9" r="1.2"/>
+      <circle cx="6" cy="14" r="1.2"/>
+      <circle cx="10" cy="14" r="1.2"/>
+      <circle cx="14" cy="14" r="1.2"/>
+      <circle cx="18" cy="14" r="1.2"/>
+    </svg>
+  </div>
+
+  <!-- แผง Numpad สัมผัส -->
+  <div id="virtual-numpad-panel">
+    <button class="vk-btn" data-key="7">7</button>
+    <button class="vk-btn" data-key="8">8</button>
+    <button class="vk-btn" data-key="9">9</button>
+    <button class="vk-btn" data-key="4">4</button>
+    <button class="vk-btn" data-key="5">5</button>
+    <button class="vk-btn" data-key="6">6</button>
+    <button class="vk-btn" data-key="1">1</button>
+    <button class="vk-btn" data-key="2">2</button>
+    <button class="vk-btn" data-key="3">3</button>
+    <button class="vk-btn fn-clear" data-key="Clear">C</button>
+    <button class="vk-btn" data-key="0">0</button>
+    <button class="vk-btn fn-clear" data-key="Backspace">⌫</button>
+    <button class="vk-btn fn-enter" data-key="Enter" style="grid-column: span 3;">ยืนยัน (Enter)</button>
+  </div>
+
+  <script>
+    const RAW_QR_TEMPLATE = "00020101021130870016A00000067701011201150105546149531300220M00000000012936608730320S000000000000024615053037645802TH6304D0E9";
+    const AUTO_TIMEOUT_SEC = 40;
+
+    const STATES = { IDLE: 'IDLE', INPUT: 'INPUT', PAYMENT: 'PAYMENT', SUCCESS: 'SUCCESS' };
+    let currentState = STATES.IDLE;
+    let inputBuffer = "";
+    let autoTimeoutTimer = null;
+    let qrGenerator = null;
+    let audioCtx = null;
+
+    const elIdle = document.getElementById('screen-idle');
+    const elInput = document.getElementById('screen-input');
+    const elPayment = document.getElementById('screen-payment');
+    const elSuccess = document.getElementById('screen-success');
+    const elDisplayAmount = document.getElementById('display-amount');
+    const elPaymentAmountLabel = document.getElementById('payment-amount-label');
+    const elQrBox = document.getElementById('qrcode');
+    const numpadToggle = document.getElementById('btn-numpad-toggle');
+    const numpadPanel = document.getElementById('virtual-numpad-panel');
+
+    function setScreenState(nextState) {
+      currentState = nextState;
+      [elIdle, elInput, elPayment, elSuccess].forEach(s => s.classList.remove('active'));
+      clearTimeout(autoTimeoutTimer);
+
+      if (nextState === STATES.IDLE) {
+        inputBuffer = "";
+        elIdle.classList.add('active');
+      } else if (nextState === STATES.INPUT) {
+        elDisplayAmount.innerText = inputBuffer || "0";
+        elInput.classList.add('active');
+        resetAutoTimeout();
+      } else if (nextState === STATES.PAYMENT) {
+        elPayment.classList.add('active');
+        resetAutoTimeout();
+      } else if (nextState === STATES.SUCCESS) {
+        elSuccess.classList.add('active');
+        setTimeout(() => setScreenState(STATES.IDLE), 2500);
+      }
+    }
+
+    function resetAutoTimeout() {
+      clearTimeout(autoTimeoutTimer);
+      autoTimeoutTimer = setTimeout(() => {
+        setScreenState(STATES.IDLE);
+      }, AUTO_TIMEOUT_SEC * 1000);
+    }
+
+    function initAudio() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContext();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playDing() {
+      try {
+        initAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1400, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(750, audioCtx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.15);
+      } catch (e) {}
+    }
+
+    function speakAmount(amount) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const num = parseFloat(amount);
+        const text = `ยอดเงิน ${num} บาท ค่ะ`;
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'th-TH';
+        utterance.rate = 1.05;
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    function crc16(data) {
+      let crc = 0xFFFF;
+      for (let i = 0; i < data.length; i++) {
+        let x = ((crc >> 8) ^ data.charCodeAt(i)) & 0xFF;
+        x ^= x >> 4;
+        crc = ((crc << 8) ^ (x << 12) ^ (x << 5) ^ x) & 0xFFFF;
+      }
+      return crc.toString(16).toUpperCase().padStart(4, '0');
+    }
+
+    function formatTag(id, val) {
+      const len = val.length.toString().padStart(2, '0');
+      return `${id}${len}${val}`;
+    }
+
+    function injectAmountToRawQR(rawQr, amount) {
+      let tags = {};
+      let index = 0;
+      const fAmount = parseFloat(amount).toFixed(2);
+
+      while (index < rawQr.length) {
+        const id = rawQr.substr(index, 2);
+        const len = parseInt(rawQr.substr(index + 2, 2), 10);
+        const val = rawQr.substr(index + 4, len);
+        tags[id] = val;
+        index += 4 + len;
+      }
+
+      tags["01"] = "12";
+      tags["53"] = "764";
+      tags["54"] = fAmount;
+      tags["58"] = "TH";
+      delete tags["63"];
+
+      let rebuilt = "";
+      for (const key of Object.keys(tags).sort()) {
+        rebuilt += formatTag(key, tags[key]);
+      }
+      rebuilt += "6304";
+      return rebuilt + crc16(rebuilt);
+    }
+
+    function renderQR(amount) {
+      const payload = injectAmountToRawQR(RAW_QR_TEMPLATE, amount);
+      elQrBox.innerHTML = "";
+      qrGenerator = new QRCode(elQrBox, {
+        text: payload,
+        width: 275,
+        height: 275,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    }
+
+    function handleAction(key) {
+      initAudio();
+      if (key === "NumpadEnter") key = "Enter";
+
+      if (currentState === STATES.IDLE) {
+        playDing();
+        inputBuffer = /\d/.test(key) ? key : "";
+        setScreenState(STATES.INPUT);
+        return;
+      }
+
+      if (currentState === STATES.INPUT) {
+        if (/\d/.test(key)) {
+          if (inputBuffer === "0") inputBuffer = "";
+          if (inputBuffer.length < 5) {
+            inputBuffer += key;
+            elDisplayAmount.innerText = inputBuffer;
+            resetAutoTimeout();
+          }
+        } else if (key === "Backspace") {
+          inputBuffer = inputBuffer.slice(0, -1);
+          elDisplayAmount.innerText = inputBuffer || "0";
+          resetAutoTimeout();
+        } else if (key === "Escape" || key === "Clear") {
+          setScreenState(STATES.IDLE);
+        } else if (key === "Enter") {
+          const num = parseFloat(inputBuffer);
+          if (num > 0) {
+            elPaymentAmountLabel.innerText = `฿${num.toLocaleString('th-TH', { minimumFractionDigits: 2 })}`;
+            renderQR(num);
+            speakAmount(num);
+            setScreenState(STATES.PAYMENT);
+          }
+        }
+        return;
+      }
+
+      if (currentState === STATES.PAYMENT) {
+        if (key === "Enter" || key === "+" || key === "NumpadAdd") {
+          setScreenState(STATES.SUCCESS);
+        } else if (key === "Escape" || key === "Backspace" || key === "Clear") {
+          setScreenState(STATES.IDLE);
+        }
+        return;
+      }
+    }
+
+    window.addEventListener('keydown', (e) => {
+      handleAction(e.key);
+    });
+
+    document.querySelectorAll('.vk-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const key = btn.getAttribute('data-key');
+        handleAction(key);
+      });
+    });
+
+    numpadToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      initAudio();
+      numpadPanel.classList.toggle('show');
+    });
+
+    elIdle.addEventListener('click', () => {
+      initAudio();
+      playDing();
+      setScreenState(STATES.INPUT);
+    });
+  </script>
+</body>
+</html>
       position: absolute;
       top: 0;
       left: 0;
