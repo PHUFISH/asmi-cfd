@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>อัสมี่ลูกชิ้นย่าง - Customer Display</title>
+  
+  <!-- Client-side QRCode Generator -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      font-family: -apple-system, BlinkMacSystemFont, "Sarabun", "SF Pro Display", sans-serif;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #0b0c10;
+      color: #ffffff;
+    }
+
+    .screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.98);
+    }
+
+    .screen.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1);
+    }
+
+    /* 1. IDLE STATE */
+    #screen-idle {
+      background: radial-gradient(circle at center, #1f140e 0%, #0d0907 100%);
+      position: relative;
+    }
+
+    .promo-banner {
+      text-align: center;
+      padding: 40px;
+    }
+
+    .promo-badge {
+      display: inline-block;
+      background: rgba(255, 107, 53, 0.2);
+      color: #ff7a00;
+      border: 1px solid rgba(255, 122, 0, 0.4);
+      padding: 8px 24px;
+      border-radius: 50px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      letter-spacing: 1px;
+    }
+
+    .promo-title {
+      font-size: 4rem;
+      font-weight: 800;
+      color: #ffb703;
+      letter-spacing: 2px;
+      margin-bottom: 16px;
+      text-shadow: 0 4px 25px rgba(255, 183, 3, 0.35);
+    }
+
+    .promo-subtitle {
+      font-size: 1.8rem;
+      color: #c9d1d9;
+      font-weight: 300;
+    }
+
+    .idle-hint {
+      position: absolute;
+      bottom: 28px;
+      font-size: 1.1rem;
+      color: #6c757d;
+      letter-spacing: 1px;
+    }
+
+    /* 2. INPUT STATE */
+    #screen-input {
+      background: radial-gradient(circle at center, #1b2838 0%, #0d131a 100%);
+    }
+
+    .input-label {
+      font-size: 2rem;
+      color: #8ecae6;
+      margin-bottom: 24px;
+      letter-spacing: 1px;
+    }
+
+    .input-amount-wrapper {
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 24px 64px;
+      border-radius: 28px;
+      border: 2px solid rgba(142, 202, 230, 0.35);
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.55);
+    }
+
+    .input-amount {
+      font-size: 6.8rem;
+      font-weight: 800;
+      color: #ffffff;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .input-currency {
+      font-size: 2.4rem;
+      color: #adb5bd;
+    }
+
+    /* 3. PAYMENT STATE */
+    #screen-payment {
+      background: radial-gradient(circle at center, #122319 0%, #08110c 100%);
+      padding: 25px;
+    }
+
+    .payment-header {
+      text-align: center;
+      margin-bottom: 18px;
+    }
+
+    .payment-title {
+      font-size: 1.6rem;
+      color: #52b788;
+      margin-bottom: 6px;
+    }
+
+    .payment-amount {
+      font-size: 4.2rem;
+      font-weight: 800;
+      color: #ffffff;
+    }
+
+    .qr-card {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 26px;
+      box-shadow: 0 16px 45px rgba(0, 0, 0, 0.65);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .qr-badge {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-top: 14px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #333333;
+    }
+
+    .qr-badge span {
+      background: #f0f2f5;
+      padding: 4px 10px;
+      border-radius: 6px;
+      color: #e63946;
+    }
+
+    .payment-footer {
+      margin-top: 22px;
+      font-size: 1.15rem;
+      color: #74c69d;
+      letter-spacing: 1px;
+      animation: pulse 1.8s infinite;
+    }
+
+    /* 4. SUCCESS STATE */
+    #screen-success {
+      background: radial-gradient(circle at center, #0f3822 0%, #07170e 100%);
+    }
+
+    .success-icon {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: #2dc653;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 55px rgba(45, 198, 83, 0.6);
+      margin-bottom: 26px;
+      animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .success-icon svg {
+      width: 76px;
+      height: 76px;
+      stroke: #ffffff;
+      stroke-width: 4;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .success-text {
+      font-size: 3rem;
+      font-weight: 700;
+      color: #d8f3dc;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
+    @keyframes pop {
+      0% { transform: scale(0.5); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1. Idle Screen -->
+  <div id="screen-idle" class="screen active">
+    <div class="promo-banner">
+      <div class="promo-badge">ยินดีต้อนรับ</div>
+      <div class="promo-title">อัสมี่ลูกชิ้นย่าง</div>
+      <div class="promo-subtitle">น้ำจิ้มรสเด็ด สูตรโบราณแท้ ปิ้งร้อนๆ หน้าร้าน</div>
+    </div>
+    <div class="idle-hint">สแกนจ่ายได้ทั้ง พร้อมเพย์ และ TrueMoney</div>
+  </div>
+
+  <!-- 2. Input Screen -->
+  <div id="screen-input" class="screen">
+    <div class="input-label">ยอดที่ต้องชำระ</div>
+    <div class="input-amount-wrapper">
+      <div id="display-amount" class="input-amount">0</div>
+      <div class="input-currency">บาท</div>
+    </div>
+  </div>
+
+  <!-- 3. Payment Screen -->
+  <div id="screen-payment" class="screen">
+    <div class="payment-header">
+      <div class="payment-title">สแกนจ่ายผ่าน พร้อมเพย์ / TrueMoney</div>
+      <div id="payment-amount-label" class="payment-amount">฿0.00</div>
+    </div>
+    <div class="qr-card">
+      <div id="qrcode"></div>
+      <div class="qr-badge">
+        <span>PromptPay</span>
+        <span>TrueMoney</span>
+      </div>
+    </div>
+    <div class="payment-footer">ระบบจะรีเซ็ตอัตโนมัติเมื่อทำรายการเสร็จ</div>
+  </div>
+
+  <!-- 4. Success Screen -->
+  <div id="screen-success" class="screen">
+    <div class="success-icon">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+    </div>
+    <div class="success-text">ชำระเงินสำเร็จ</div>
+  </div>
+
+  <script>
+    // ==========================================
+    // CONFIGURATION (ผูกกับร้านอัสมี่ลูกชิ้นย่าง)
+    // ==========================================
+    const RAW_QR_TEMPLATE = "00020101021130870016A00000067701011201150105546149531300220M00000000012936608730320S000000000000024615053037645802TH6304D0E9";
+    const AUTO_TIMEOUT_SEC = 40;
+
+    // ==========================================
+    // STATE MACHINE
+    // ==========================================
+    const STATES = { IDLE: 'IDLE', INPUT: 'INPUT', PAYMENT: 'PAYMENT', SUCCESS: 'SUCCESS' };
+    let currentState = STATES.IDLE;
+    let inputBuffer = "";
+    let autoTimeoutTimer = null;
+    let qrGenerator = null;
+    let audioCtx = null;
+
+    // DOM Elements
+    const elIdle = document.getElementById('screen-idle');
+    const elInput = document.getElementById('screen-input');
+    const elPayment = document.getElementById('screen-payment');
+    const elSuccess = document.getElementById('screen-success');
+    const elDisplayAmount = document.getElementById('display-amount');
+    const elPaymentAmountLabel = document.getElementById('payment-amount-label');
+    const elQrBox = document.getElementById('qrcode');
+
+    function setScreenState(nextState) {
+      currentState = nextState;
+      [elIdle, elInput, elPayment, elSuccess].forEach(s => s.classList.remove('active'));
+      clearTimeout(autoTimeoutTimer);
+
+      if (nextState === STATES.IDLE) {
+        inputBuffer = "";
+        elIdle.classList.add('active');
+      } else if (nextState === STATES.INPUT) {
+        elDisplayAmount.innerText = inputBuffer || "0";
+        elInput.classList.add('active');
+        resetAutoTimeout();
+      } else if (nextState === STATES.PAYMENT) {
+        elPayment.classList.add('active');
+        resetAutoTimeout();
+      } else if (nextState === STATES.SUCCESS) {
+        elSuccess.classList.add('active');
+        setTimeout(() => setScreenState(STATES.IDLE), 2500);
+      }
+    }
+
+    function resetAutoTimeout() {
+      clearTimeout(autoTimeoutTimer);
+      autoTimeoutTimer = setTimeout(() => {
+        setScreenState(STATES.IDLE);
+      }, AUTO_TIMEOUT_SEC * 1000);
+    }
+
+    // ==========================================
+    // AUDIO ENGINE (Web Audio & Speech)
+    // ==========================================
+    function initAudio() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContext();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playDing() {
+      try {
+        initAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1400, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(750, audioCtx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.15);
+      } catch (e) {
+        console.warn("Audio error:", e);
+      }
+    }
+
+    function speakAmount(amount) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const num = parseFloat(amount);
+        const text = `ยอดเงิน ${num} บาท ค่ะ`;
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'th-TH';
+        utterance.rate = 1.05;
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    // ==========================================
+    // EMVCO CRC16 & DYNAMIC PAYLOAD
+    // ==========================================
+    function crc16(data) {
+      let crc = 0xFFFF;
+      for (let i = 0; i < data.length; i++) {
+        let x = ((crc >> 8) ^ data.charCodeAt(i)) & 0xFF;
+        x ^= x >> 4;
+        crc = ((crc << 8) ^ (x << 12) ^ (x << 5) ^ x) & 0xFFFF;
+      }
+      return crc.toString(16).toUpperCase().padStart(4, '0');
+    }
+
+    function formatTag(id, val) {
+      const len = val.length.toString().padStart(2, '0');
+      return `${id}${len}${val}`;
+    }
+
+    function injectAmountToRawQR(rawQr, amount) {
+      let tags = {};
+      let index = 0;
+      const fAmount = parseFloat(amount).toFixed(2);
+
+      while (index < rawQr.length) {
+        const id = rawQr.substr(index, 2);
+        const len = parseInt(rawQr.substr(index + 2, 2), 10);
+        const val = rawQr.substr(index + 4, len);
+        tags[id] = val;
+        index += 4 + len;
+      }
+
+      tags["01"] = "12"; // Dynamic QR
+      tags["53"] = "764"; // THB Currency
+      tags["54"] = fAmount; // Injected Amount
+      tags["58"] = "TH"; // Country
+      delete tags["63"]; // Reset Checksum
+
+      let rebuilt = "";
+      for (const key of Object.keys(tags).sort()) {
+        rebuilt += formatTag(key, tags[key]);
+      }
+      rebuilt += "6304";
+      return rebuilt + crc16(rebuilt);
+    }
+
+    function renderQR(amount) {
+      const payload = injectAmountToRawQR(RAW_QR_TEMPLATE, amount);
+      elQrBox.innerHTML = "";
+      qrGenerator = new QRCode(elQrBox, {
+        text: payload,
+        width: 300,
+        height: 300,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    }
+
+    // ==========================================
+    // KEYPAD CONTROLLER
+    // ==========================================
+    window.addEventListener('keydown', (e) => {
+      initAudio();
+      const key = e.key;
+
+      if (currentState === STATES.IDLE) {
+        playDing();
+        inputBuffer = /\d/.test(key) ? key : "";
+        setScreenState(STATES.INPUT);
+        return;
+      }
+
+      if (currentState === STATES.INPUT) {
+        if (/\d/.test(key)) {
+          if (inputBuffer === "0") inputBuffer = "";
+          if (inputBuffer.length < 5) {
+            inputBuffer += key;
+            elDisplayAmount.innerText = inputBuffer;
+            resetAutoTimeout();
+          }
+        } else if (key === "Backspace") {
+          inputBuffer = inputBuffer.slice(0, -1);
+          elDisplayAmount.innerText = inputBuffer || "0";
+          resetAutoTimeout();
+        } else if (key === "Escape" || key === "Clear") {
+          setScreenState(STATES.IDLE);
+        } else if (key === "Enter") {
+          const num = parseFloat(inputBuffer);
+          if (num > 0) {
+            elPaymentAmountLabel.innerText = `฿${num.toLocaleString('th-TH', { minimumFractionDigits: 2 })}`;
+            renderQR(num);
+            speakAmount(num);
+            setScreenState(STATES.PAYMENT);
+          }
+        }
+        return;
+      }
+
+      if (currentState === STATES.PAYMENT) {
+        if (key === "Enter" || key === "+") {
+          setScreenState(STATES.SUCCESS);
+        } else if (key === "Escape" || key === "Backspace") {
+          setScreenState(STATES.IDLE);
+        }
+        return;
+      }
+    });
+
+    window.addEventListener('touchstart', () => {
+      initAudio();
+      if (currentState === STATES.IDLE) {
+        playDing();
+        setScreenState(STATES.INPUT);
+      }
+    }, { passive: true });
+  </script>
+</body>
+</html>
