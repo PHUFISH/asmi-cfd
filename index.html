@@ -9,7 +9,7 @@
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,300;0,400;0,600;0,700;0,800&family=Amiri:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700;800&family=Kanit:ital,wght@0,300;0,400;0,600;0,700;0,800&family=Amiri:wght@700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
   <style>
@@ -19,14 +19,14 @@
       padding: 0;
       user-select: none;
       -webkit-user-select: none;
-      font-family: 'Kanit', -apple-system, sans-serif;
+      font-family: 'Prompt', 'Kanit', -apple-system, sans-serif;
     }
 
     body, html {
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background-color: #08090d;
+      background-color: #06080d;
       color: #ffffff;
     }
 
@@ -228,110 +228,184 @@
     }
 
     /* ==========================================
-       3. PAYMENT STATE: TRUEMONEY YELLOW-ORANGE FRAME
+       3. PAYMENT STATE: การ์ดถุงเงินโมเดิร์น สวย สมมาตร
        ========================================== */
     #screen-payment {
-      background: radial-gradient(circle at center, #15181f 0%, #080a0f 100%);
-      padding: 20px;
-    }
-
-    .payment-price-capsule {
-      background: rgba(255, 200, 59, 0.06);
-      border: 1.5px solid rgba(255, 183, 3, 0.6);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-      border-radius: 22px;
-      padding: 8px 46px;
-      margin-bottom: 16px;
+      background: radial-gradient(circle at center, #0d1527 0%, #040711 100%);
+      padding: 16px;
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
+      gap: 14px;
     }
 
-    .payment-title-small {
-      font-size: 1.1rem;
-      color: #ffd166;
-    }
-
-    .payment-amount-neon {
-      font-size: 4.6rem;
-      font-weight: 800;
-      color: #ffffff;
-      text-shadow: 0 0 20px rgba(255, 209, 102, 0.4);
-      line-height: 1.1;
-    }
-
-    /* การ์ดสไตล์ TrueMoney กรอบสีเหลือง-ส้ม */
-    .qr-card-container {
+    .thung-card {
       background: #ffffff;
-      border: 4px solid #ffbc00;
       border-radius: 26px;
       overflow: hidden;
-      box-shadow: 0 15px 45px rgba(255, 188, 0, 0.25), 0 20px 50px rgba(0, 0, 0, 0.85);
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85), 0 0 50px rgba(0, 55, 100, 0.4);
       display: flex;
       flex-direction: column;
       align-items: center;
-      width: 320px;
+      width: 90vw;
+      max-width: 440px;
+      max-height: 85vh;
+      animation: popCard 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .qr-card-header-tm {
+    /* หัวการ์ดสไตล์ Thai QR Payment */
+    .thung-header {
       width: 100%;
-      background: linear-gradient(135deg, #f58220 0%, #ffbc00 100%);
-      color: #ffffff;
-      padding: 10px 0;
-      text-align: center;
-      font-size: 1.15rem;
-      font-weight: 800;
-      letter-spacing: 1px;
+      background: #003764;
+      padding: 12px 20px 10px 20px;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      gap: 8px;
-      text-shadow: 0 1px 4px rgba(0,0,0,0.3);
-    }
-
-    .qr-scanner-box {
-      padding: 16px;
-      background: #ffffff;
-    }
-
-    /* แถบระบุ PromptPay & TrueMoney ด้านล่าง */
-    .payment-brands-bar {
-      display: flex;
-      width: 100%;
-      border-top: 1.5px solid #f1f3f5;
-      background: #fafbfc;
-    }
-
-    .brand-tab {
-      flex: 1;
-      padding: 10px 0;
-      text-align: center;
-      font-size: 0.95rem;
-      font-weight: 800;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       gap: 6px;
     }
 
-    .brand-tab.pp {
-      color: #003764;
-      border-right: 1.5px solid #e9ecef;
-      background: #f8fafc;
-    }
-
-    .brand-tab.tm {
-      color: #e65100;
-      background: #fffdf5;
-    }
-
-    .payment-status-hint {
-      margin-top: 16px;
-      font-size: 1.1rem;
-      color: #ffd166;
+    .thai-qr-logo-row {
       display: flex;
       align-items: center;
       gap: 8px;
+      color: #ffffff;
+      font-size: 1.2rem;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+    }
+
+    .thai-qr-logo-row svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .support-badges-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      color: #cbd5e1;
+      font-weight: 600;
+    }
+
+    .badge-tag {
+      background: rgba(255, 255, 255, 0.16);
+      padding: 2px 10px;
+      border-radius: 6px;
+      color: #ffffff;
+    }
+
+    .badge-tag.tm {
+      background: linear-gradient(135deg, #f58220, #ffbc00);
+      color: #ffffff;
+    }
+
+    /* ตัว QR Code ขนาดใหญ่เต็มกรอบ */
+    .thung-qr-body {
+      padding: 18px 24px 8px 24px;
+      background: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+
+    /* ชื่อร้านค้าเด่นชัด */
+    .shop-title-area {
+      text-align: center;
+      padding: 4px 16px 12px 16px;
+      background: #ffffff;
+      width: 100%;
+    }
+
+    .shop-name-label {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.2px;
+      line-height: 1.2;
+    }
+
+    .shop-subtitle {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 2px;
+      font-weight: 500;
+    }
+
+    /* กล่องแถบสรุปยอดเงิน สไตล์ถุงเงินแต่หรู คลีน ไม่ตัดแปะ */
+    .thung-amount-strip {
+      width: 100%;
+      background: #f8fafc;
+      border-top: 1.5px solid #e2e8f0;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .amount-label-left {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #475569;
+    }
+
+    .amount-value-right {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .amount-digits {
+      font-size: 2.8rem;
+      font-weight: 800;
+      color: #003764; /* สีน้ำเงินเข้มภูมิฐาน คมชัด เข้ากับหัวการ์ด */
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.5px;
+    }
+
+    .amount-baht-text {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #64748b;
+    }
+
+    /* ปุ่มบันทึก QR สไตล์แอปถุงเงิน */
+    .btn-save-qr {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 30px;
+      padding: 10px 28px;
+      color: #e2e8f0;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+      transition: all 0.2s ease;
+    }
+
+    .btn-save-qr:hover {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: #ffd166;
+      color: #ffd166;
+    }
+
+    .btn-save-qr:active {
+      transform: scale(0.95);
+    }
+
+    .btn-save-qr svg {
+      width: 20px;
+      height: 20px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.2;
     }
 
     /* 4. SUCCESS STATE */
@@ -447,6 +521,11 @@
       0% { opacity: 0.25; }
       100% { opacity: 0.55; }
     }
+
+    @keyframes popCard {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
   </style>
 </head>
 <body>
@@ -489,30 +568,59 @@
     </div>
   </div>
 
-  <!-- 3. Payment Screen (TrueMoney Yellow-Orange Frame) -->
+  <!-- 3. Payment Screen (สไตล์ถุงเงินโมเดิร์น สมมาตร สวย พรีเมียม) -->
   <div id="screen-payment" class="screen">
-    <div class="payment-price-capsule">
-      <div class="payment-title-small">ยอดเงินที่ต้องชำระ</div>
-      <div id="payment-amount-label" class="payment-amount-neon">฿0.00</div>
-    </div>
-
-    <!-- การ์ดกรอบสไตล์ TrueMoney -->
-    <div class="qr-card-container">
-      <div class="qr-card-header-tm">
-        <span>สแกนจ่าย QR Code</span>
+    <div class="thung-card">
+      
+      <!-- หัวการ์ด -->
+      <div class="thung-header">
+        <div class="thai-qr-logo-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <rect x="3" y="3" width="7" height="7"/>
+            <rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/>
+          </svg>
+          <span>THAI QR PAYMENT</span>
+        </div>
+        <div class="support-badges-row">
+          <span class="badge-tag">PromptPay</span>
+          <span class="badge-tag tm">TrueMoney</span>
+          <span>สแกนจ่ายได้ทุกธนาคาร</span>
+        </div>
       </div>
-      <div class="qr-scanner-box">
+
+      <!-- พื้นที่ QR Code ขนาดใหญ่เต็มกรอบ -->
+      <div class="thung-qr-body">
         <div id="qrcode"></div>
       </div>
-      <div class="payment-brands-bar">
-        <div class="brand-tab pp">PromptPay</div>
-        <div class="brand-tab tm">TrueMoney</div>
+
+      <!-- ชื่อร้านค้า -->
+      <div class="shop-title-area">
+        <div class="shop-name-label">อัสมี่ลูกชิ้นย่าง</div>
+        <div class="shop-subtitle">สแกนชำระผ่านโมบายแบงก์กิ้งหรือกระเป๋าเงินดิจิทัล</div>
       </div>
+
+      <!-- แถบสรุปยอดเงินด้านล่างแบบถุงเงิน (สมมาตร คลีนตา) -->
+      <div class="thung-amount-strip">
+        <div class="amount-label-left">ยอดเงิน</div>
+        <div class="amount-value-right">
+          <span id="payment-amount-label" class="amount-digits">0</span>
+          <span class="amount-baht-text">บาท</span>
+        </div>
+      </div>
+
     </div>
 
-    <div class="payment-status-hint">
-      ● กำลังรอการชำระเงิน...
-    </div>
+    <!-- ปุ่มบันทึกภาพ QR ลงเครื่อง (สไตล์ถุงเงิน) -->
+    <button id="btn-save-qr" class="btn-save-qr">
+      <svg viewBox="0 0 24 24">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="7 10 12 15 17 10"></polyline>
+        <line x1="12" y1="15" x2="12" y2="3"></line>
+      </svg>
+      <span>บันทึก QR</span>
+    </button>
   </div>
 
   <!-- 4. Success Screen -->
@@ -573,6 +681,7 @@
     const elDisplayAmount = document.getElementById('display-amount');
     const elPaymentAmountLabel = document.getElementById('payment-amount-label');
     const elQrBox = document.getElementById('qrcode');
+    const btnSaveQr = document.getElementById('btn-save-qr');
     const numpadToggle = document.getElementById('btn-numpad-toggle');
     const numpadPanel = document.getElementById('virtual-numpad-panel');
 
@@ -635,7 +744,7 @@
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
         const num = parseFloat(amount);
-        const text = `ยอดเงิน ${num} บาท ค่ะ`;
+        const text = `ยอดเงิน ${num} บาท`;
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'th-TH';
         utterance.rate = 1.05;
@@ -685,18 +794,50 @@
       return rebuilt + crc16(rebuilt);
     }
 
+    function getCardQRSize() {
+      const isPortrait = window.innerHeight > window.innerWidth;
+      if (isPortrait) {
+        return Math.min(Math.floor(window.innerWidth * 0.70), Math.floor(window.innerHeight * 0.44));
+      } else {
+        return Math.min(Math.floor(window.innerHeight * 0.48), Math.floor(window.innerWidth * 0.36));
+      }
+    }
+
     function renderQR(amount) {
       const payload = injectAmountToRawQR(RAW_QR_TEMPLATE, amount);
+      const qrDimension = getCardQRSize();
       elQrBox.innerHTML = "";
       qrGenerator = new QRCode(elQrBox, {
         text: payload,
-        width: 275,
-        height: 275,
+        width: qrDimension,
+        height: qrDimension,
         colorDark: "#000000",
         colorLight: "#ffffff",
         correctLevel: QRCode.CorrectLevel.M
       });
     }
+
+    btnSaveQr.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const canvas = elQrBox.querySelector('canvas');
+      const img = elQrBox.querySelector('img');
+      let dataUrl = "";
+
+      if (canvas) {
+        dataUrl = canvas.toDataURL("image/png");
+      } else if (img && img.src) {
+        dataUrl = img.src;
+      }
+
+      if (dataUrl) {
+        const link = document.createElement('a');
+        link.download = `QR_Asmi_${inputBuffer || 'payment'}.png`;
+        link.href = dataUrl;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    });
 
     function handleAction(key) {
       initAudio();
@@ -726,7 +867,7 @@
         } else if (key === "Enter") {
           const num = parseFloat(inputBuffer);
           if (num > 0) {
-            elPaymentAmountLabel.innerText = `฿${num.toLocaleString('th-TH', { minimumFractionDigits: 2 })}`;
+            elPaymentAmountLabel.innerText = num.toLocaleString('th-TH');
             renderQR(num);
             speakAmount(num);
             setScreenState(STATES.PAYMENT);
@@ -767,6 +908,12 @@
       initAudio();
       playDing();
       setScreenState(STATES.INPUT);
+    });
+
+    window.addEventListener('resize', () => {
+      if (currentState === STATES.PAYMENT && inputBuffer) {
+        renderQR(parseFloat(inputBuffer));
+      }
     });
   </script>
 </body>
