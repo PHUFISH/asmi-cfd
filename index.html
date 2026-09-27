@@ -7,10 +7,10 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>อัสมี่ ลูกชิ้นย่างเตาถ่าน & ต้มแซ่บเนื้อ ฮาลาล</title>
   
-  <!-- Fonts: Kanit & Amiri -->
+  <!-- Fonts: Kanit (300, 600, 900) & Amiri (Arabic) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,400;0,600;0,800;0,900;1,800&family=Amiri:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,300;0,400;0,600;0,800;0,900;1,800&family=Amiri:wght@700&display=swap" rel="stylesheet">
 
   <!-- Client-side QRCode Generator -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -29,11 +29,889 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background-color: #060504;
+      background-color: #050403;
       color: #ffffff;
     }
 
     .screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.35s ease, transform 0.35s ease;
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.98);
+    }
+
+    .screen.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1);
+    }
+
+    /* ==========================================
+       1. IDLE STATE: SUNBEAMS & DUAL-HERO
+       ========================================== */
+    #screen-idle {
+      background: radial-gradient(circle at 50% 50%, #1a0d06 0%, #080402 70%, #030201 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* ลำแสงอาทิตย์เล็ดลอดเป็นแฉก (God Rays / Sunbeams) */
+    .sunbeams {
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: repeating-conic-gradient(
+        from 0deg at 50% 50%,
+        rgba(255, 140, 0, 0.09) 0deg 15deg,
+        transparent 15deg 30deg,
+        rgba(255, 200, 50, 0.12) 30deg 45deg,
+        transparent 45deg 60deg
+      );
+      animation: rotateSunbeams 35s linear infinite;
+      filter: blur(28px);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* แสงไอความร้อนเตาถ่านวูบวาบ */
+    .charcoal-glow {
+      position: absolute;
+      width: 800px;
+      height: 500px;
+      background: radial-gradient(ellipse, rgba(255, 80, 0, 0.28) 0%, rgba(255, 160, 0, 0.12) 50%, transparent 80%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      filter: blur(55px);
+      animation: emberBreathe 4s ease-in-out infinite alternate;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .signage-container {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      width: 95%;
+      max-width: 980px;
+      animation: floatContainer 5s ease-in-out infinite alternate;
+    }
+
+    /* 1. ชื่อแบรนด์ อัสมี่ (ตัวบาง มินิมอลหรูหรา) */
+    .brand-asmi {
+      font-size: 2.8rem;
+      font-weight: 300;
+      letter-spacing: 14px;
+      color: #ffd8a8;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      text-shadow: 0 2px 15px rgba(255, 200, 100, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .brand-asmi::before, .brand-asmi::after {
+      content: "";
+      display: inline-block;
+      width: 40px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 216, 168, 0.8));
+    }
+    .brand-asmi::after {
+      background: linear-gradient(90deg, rgba(255, 216, 168, 0.8), transparent);
+    }
+
+    /* 2. Dual-Hero เมนูหลักทั้งสอง */
+    .hero-dual-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 20px;
+    }
+
+    .hero-item {
+      font-size: 4.8rem;
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -0.5px;
+      position: relative;
+      background: linear-gradient(90deg, #ffeedd 0%, #ffc300 25%, #ff5400 50%, #ffc300 75%, #ffeedd 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 6px 0px rgba(0, 0, 0, 0.95)) drop-shadow(0 12px 28px rgba(255, 80, 0, 0.65));
+      animation: textShimmer 4.5s linear infinite;
+    }
+
+    .hero-divider {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      width: 100%;
+      justify-content: center;
+      margin: -4px 0;
+    }
+
+    .hero-divider-line {
+      height: 1.5px;
+      width: 80px;
+      background: linear-gradient(90deg, transparent, rgba(255, 183, 3, 0.6), transparent);
+    }
+
+    .hero-amp {
+      font-size: 2.4rem;
+      font-weight: 800;
+      color: #ff6b35;
+      text-shadow: 0 0 15px rgba(255, 107, 53, 0.8);
+    }
+
+    /* 3. ตราฮาลาล (ตัด 100% ออก สวยสง่างาม) */
+    .halal-badge {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: linear-gradient(135deg, rgba(8, 70, 38, 0.9) 0%, rgba(4, 38, 20, 0.95) 100%);
+      border: 1.8px solid #d4af37;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6), 0 0 15px rgba(212, 175, 55, 0.35);
+      border-radius: 50px;
+      padding: 6px 28px;
+      backdrop-filter: blur(10px);
+    }
+
+    .halal-arabic {
+      font-family: 'Amiri', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #ffd166;
+      line-height: 1;
+      padding-bottom: 4px;
+    }
+
+    .halal-thai {
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: 3px;
+      color: #ffffff;
+      text-transform: uppercase;
+    }
+
+    .bottom-hint {
+      position: absolute;
+      bottom: 22px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.95rem;
+      color: #94a3b8;
+      z-index: 2;
+    }
+
+    .payment-pill {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 16px;
+      padding: 3px 12px;
+      color: #cbd5e1;
+      font-weight: 600;
+    }
+
+    /* ==========================================
+       2. INPUT STATE
+       ========================================== */
+    #screen-input {
+      background: radial-gradient(circle at center, #182635 0%, #0a1118 100%);
+    }
+
+    .input-label {
+      font-size: 2.2rem;
+      font-weight: 600;
+      color: #90e0ef;
+      margin-bottom: 22px;
+    }
+
+    .input-amount-wrapper {
+      display: flex;
+      align-items: baseline;
+      gap: 18px;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 24px 68px;
+      border-radius: 30px;
+      border: 2px solid rgba(144, 224, 239, 0.4);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+    }
+
+    .input-amount {
+      font-size: 7.5rem;
+      font-weight: 900;
+      color: #ffffff;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .input-currency {
+      font-size: 2.6rem;
+      font-weight: 600;
+      color: #94a3b8;
+    }
+
+    /* ==========================================
+       3. PAYMENT STATE
+       ========================================== */
+    #screen-payment {
+      background: radial-gradient(circle at 50% 40%, #152219 0%, #09120c 70%, #040805 100%);
+      padding: 20px;
+    }
+
+    .payment-price-capsule {
+      background: rgba(0, 0, 0, 0.55);
+      border: 2px solid #ffb703;
+      box-shadow: 0 0 25px rgba(255, 183, 3, 0.3), inset 0 0 15px rgba(255, 183, 3, 0.15);
+      border-radius: 24px;
+      padding: 10px 48px;
+      margin-bottom: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .payment-title-small {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #ffd166;
+      letter-spacing: 1px;
+    }
+
+    .payment-amount-neon {
+      font-size: 4.8rem;
+      font-weight: 900;
+      color: #ffe600;
+      text-shadow: 0 0 25px rgba(255, 230, 0, 0.65);
+      line-height: 1.1;
+    }
+
+    .qr-card-container {
+      background: #ffffff;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 320px;
+    }
+
+    .qr-card-header {
+      width: 100%;
+      background: #003764;
+      color: #ffffff;
+      padding: 8px 0;
+      text-align: center;
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+    }
+
+    .qr-scanner-box {
+      position: relative;
+      padding: 16px;
+      background: #ffffff;
+    }
+
+    .qr-laser-line {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      right: 16px;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #00b4d8, #90e0ef, #00b4d8, transparent);
+      box-shadow: 0 0 10px #00b4d8;
+      border-radius: 50%;
+      animation: laserScan 2.5s ease-in-out infinite alternate;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .payment-brands-bar {
+      display: flex;
+      width: 100%;
+      border-top: 1px solid #e9ecef;
+      background: #f8f9fa;
+    }
+
+    .brand-tab {
+      flex: 1;
+      padding: 8px 0;
+      text-align: center;
+      font-size: 0.95rem;
+      font-weight: 800;
+    }
+
+    .brand-tab.pp {
+      color: #003764;
+      border-right: 1px solid #dee2e6;
+    }
+
+    .brand-tab.tm {
+      color: #f37021;
+    }
+
+    .payment-status-hint {
+      margin-top: 18px;
+      font-size: 1.15rem;
+      color: #74c69d;
+      letter-spacing: 1px;
+      animation: pulse 1.6s infinite;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ==========================================
+       4. SUCCESS STATE
+       ========================================== */
+    #screen-success {
+      background: radial-gradient(circle at center, #0f3d24 0%, #06190e 100%);
+    }
+
+    .success-icon {
+      width: 145px;
+      height: 145px;
+      border-radius: 50%;
+      background: #2dc653;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 60px rgba(45, 198, 83, 0.65);
+      margin-bottom: 28px;
+      animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .success-icon svg {
+      width: 80px;
+      height: 80px;
+      stroke: #ffffff;
+      stroke-width: 4.5;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .success-text {
+      font-size: 3.2rem;
+      font-weight: 800;
+      color: #d8f3dc;
+    }
+
+    /* ==========================================
+       FALLBACK TOUCH VIRTUAL NUMPAD
+       ========================================== */
+    #btn-numpad-toggle {
+      position: fixed;
+      bottom: 18px;
+      right: 18px;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 1000;
+      opacity: 0.4;
+      transition: all 0.2s ease;
+    }
+
+    #btn-numpad-toggle:active {
+      transform: scale(0.92);
+      opacity: 1;
+    }
+
+    #btn-numpad-toggle svg {
+      width: 26px;
+      height: 26px;
+      fill: #ffffff;
+    }
+
+    #virtual-numpad-panel {
+      position: fixed;
+      bottom: 80px;
+      right: 18px;
+      background: rgba(18, 22, 28, 0.95);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 24px;
+      padding: 16px;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.75);
+      display: grid;
+      grid-template-columns: repeat(3, 68px);
+      gap: 10px;
+      z-index: 999;
+      transform: translateY(20px) scale(0.95);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.2);
+    }
+
+    #virtual-numpad-panel.show {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .vk-btn {
+      height: 56px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      color: #ffffff;
+      font-size: 1.5rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .vk-btn:active {
+      background: rgba(255, 255, 255, 0.25);
+      transform: scale(0.94);
+    }
+
+    .vk-btn.fn-clear {
+      color: #ff6b6b;
+      font-size: 1.2rem;
+    }
+
+    .vk-btn.fn-enter {
+      background: #2a9d8f;
+      color: #ffffff;
+      font-size: 1.15rem;
+      font-weight: 700;
+      border: none;
+    }
+
+    .vk-btn.fn-enter:active {
+      background: #21867a;
+    }
+
+    /* Keyframe Animations */
+    @keyframes rotateSunbeams {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes emberBreathe {
+      0% { opacity: 0.5; transform: translate(-50%, -50%) scale(0.9); }
+      100% { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
+    }
+
+    @keyframes floatContainer {
+      0% { transform: translateY(0px); }
+      100% { transform: translateY(-7px); }
+    }
+
+    @keyframes textShimmer {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
+    }
+
+    @keyframes laserScan {
+      0% { top: 16px; opacity: 0.3; }
+      50% { opacity: 1; }
+      100% { top: 290px; opacity: 0.3; }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
+    @keyframes pop {
+      0% { transform: scale(0.5); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1. Idle Screen -->
+  <div id="screen-idle" class="screen active">
+    <div class="sunbeams"></div>
+    <div class="charcoal-glow"></div>
+    
+    <div class="signage-container">
+      <!-- 1. แบรนด์อัสมี่ มินิมอลหรูหรา -->
+      <div class="brand-asmi">อัสมี่</div>
+
+      <!-- 2. Dual-Hero: ลูกชิ้นย่างเตาถ่าน & ต้มแซ่บเนื้อ -->
+      <div class="hero-dual-wrapper">
+        <div class="hero-item">ลูกชิ้นย่างเตาถ่าน</div>
+        <div class="hero-divider">
+          <div class="hero-divider-line"></div>
+          <span class="hero-amp">&</span>
+          <div class="hero-divider-line"></div>
+        </div>
+        <div class="hero-item">ต้มแซ่บเนื้อ</div>
+      </div>
+
+      <!-- 3. ตราฮาลาล (ตัด 100% ออก) -->
+      <div class="halal-badge">
+        <span class="halal-arabic">حلال</span>
+        <span class="halal-thai">ฮาลาล</span>
+      </div>
+    </div>
+
+    <div class="bottom-hint">
+      <span>พร้อมรับชำระ</span>
+      <div class="payment-pill">พร้อมเพย์</div>
+      <div class="payment-pill">TrueMoney</div>
+    </div>
+  </div>
+
+  <!-- 2. Input Screen -->
+  <div id="screen-input" class="screen">
+    <div class="input-label">ยอดที่ต้องชำระ</div>
+    <div class="input-amount-wrapper">
+      <div id="display-amount" class="input-amount">0</div>
+      <div class="input-currency">บาท</div>
+    </div>
+  </div>
+
+  <!-- 3. Payment Screen -->
+  <div id="screen-payment" class="screen">
+    <div class="payment-price-capsule">
+      <div class="payment-title-small">ยอดเงินที่ต้องชำระ</div>
+      <div id="payment-amount-label" class="payment-amount-neon">฿0.00</div>
+    </div>
+
+    <div class="qr-card-container">
+      <div class="qr-card-header">THAI QR PAYMENT</div>
+      <div class="qr-scanner-box">
+        <div class="qr-laser-line"></div>
+        <div id="qrcode"></div>
+      </div>
+      <div class="payment-brands-bar">
+        <div class="brand-tab pp">พร้อมเพย์</div>
+        <div class="brand-tab tm">TrueMoney</div>
+      </div>
+    </div>
+
+    <div class="payment-status-hint">
+      <span>●</span> กำลังรอการชำระเงิน...
+    </div>
+  </div>
+
+  <!-- 4. Success Screen -->
+  <div id="screen-success" class="screen">
+    <div class="success-icon">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+    </div>
+    <div class="success-text">ชำระเงินสำเร็จ</div>
+  </div>
+
+  <!-- ปุ่มเปิด Virtual Numpad ลอยมุมล่างขวา -->
+  <div id="btn-numpad-toggle" title="เปิดแป้นพิมพ์สำรอง">
+    <svg viewBox="0 0 24 24">
+      <rect x="2" y="4" width="20" height="16" rx="3" stroke="currentColor" fill="none" stroke-width="1.8"/>
+      <circle cx="6" cy="9" r="1.2" fill="currentColor"/>
+      <circle cx="10" cy="9" r="1.2" fill="currentColor"/>
+      <circle cx="14" cy="9" r="1.2" fill="currentColor"/>
+      <circle cx="18" cy="9" r="1.2" fill="currentColor"/>
+      <circle cx="6" cy="14" r="1.2" fill="currentColor"/>
+      <circle cx="10" cy="14" r="1.2" fill="currentColor"/>
+      <circle cx="14" cy="14" r="1.2" fill="currentColor"/>
+      <circle cx="18" cy="14" r="1.2" fill="currentColor"/>
+    </svg>
+  </div>
+
+  <!-- แผง Numpad สัมผัสสำรอง -->
+  <div id="virtual-numpad-panel">
+    <button class="vk-btn" data-key="7">7</button>
+    <button class="vk-btn" data-key="8">8</button>
+    <button class="vk-btn" data-key="9">9</button>
+    <button class="vk-btn" data-key="4">4</button>
+    <button class="vk-btn" data-key="5">5</button>
+    <button class="vk-btn" data-key="6">6</button>
+    <button class="vk-btn" data-key="1">1</button>
+    <button class="vk-btn" data-key="2">2</button>
+    <button class="vk-btn" data-key="3">3</button>
+    <button class="vk-btn fn-clear" data-key="Clear">C</button>
+    <button class="vk-btn" data-key="0">0</button>
+    <button class="vk-btn fn-clear" data-key="Backspace">⌫</button>
+    <button class="vk-btn fn-enter" data-key="Enter" style="grid-column: span 3;">ยืนยัน (Enter)</button>
+  </div>
+
+  <script>
+    // ==========================================
+    // CONFIGURATION (ร้านอัสมี่ลูกชิ้นย่าง)
+    // ==========================================
+    const RAW_QR_TEMPLATE = "00020101021130870016A00000067701011201150105546149531300220M00000000012936608730320S000000000000024615053037645802TH6304D0E9";
+    const AUTO_TIMEOUT_SEC = 40;
+
+    // ==========================================
+    // STATE MACHINE
+    // ==========================================
+    const STATES = { IDLE: 'IDLE', INPUT: 'INPUT', PAYMENT: 'PAYMENT', SUCCESS: 'SUCCESS' };
+    let currentState = STATES.IDLE;
+    let inputBuffer = "";
+    let autoTimeoutTimer = null;
+    let qrGenerator = null;
+    let audioCtx = null;
+
+    // Elements
+    const elIdle = document.getElementById('screen-idle');
+    const elInput = document.getElementById('screen-input');
+    const elPayment = document.getElementById('screen-payment');
+    const elSuccess = document.getElementById('screen-success');
+    const elDisplayAmount = document.getElementById('display-amount');
+    const elPaymentAmountLabel = document.getElementById('payment-amount-label');
+    const elQrBox = document.getElementById('qrcode');
+    const numpadToggle = document.getElementById('btn-numpad-toggle');
+    const numpadPanel = document.getElementById('virtual-numpad-panel');
+
+    function setScreenState(nextState) {
+      currentState = nextState;
+      [elIdle, elInput, elPayment, elSuccess].forEach(s => s.classList.remove('active'));
+      clearTimeout(autoTimeoutTimer);
+
+      if (nextState === STATES.IDLE) {
+        inputBuffer = "";
+        elIdle.classList.add('active');
+      } else if (nextState === STATES.INPUT) {
+        elDisplayAmount.innerText = inputBuffer || "0";
+        elInput.classList.add('active');
+        resetAutoTimeout();
+      } else if (nextState === STATES.PAYMENT) {
+        elPayment.classList.add('active');
+        resetAutoTimeout();
+      } else if (nextState === STATES.SUCCESS) {
+        elSuccess.classList.add('active');
+        setTimeout(() => setScreenState(STATES.IDLE), 2500);
+      }
+    }
+
+    function resetAutoTimeout() {
+      clearTimeout(autoTimeoutTimer);
+      autoTimeoutTimer = setTimeout(() => {
+        setScreenState(STATES.IDLE);
+      }, AUTO_TIMEOUT_SEC * 1000);
+    }
+
+    // ==========================================
+    // AUDIO ENGINE
+    // ==========================================
+    function initAudio() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContext();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playDing() {
+      try {
+        initAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1400, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(750, audioCtx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.15);
+      } catch (e) {
+        console.warn("Audio error:", e);
+      }
+    }
+
+    function speakAmount(amount) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const num = parseFloat(amount);
+        const text = `ยอดเงิน ${num} บาท ค่ะ`;
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'th-TH';
+        utterance.rate = 1.05;
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    // ==========================================
+    // EMVCO CRC16 & DYNAMIC PAYLOAD
+    // ==========================================
+    function crc16(data) {
+      let crc = 0xFFFF;
+      for (let i = 0; i < data.length; i++) {
+        let x = ((crc >> 8) ^ data.charCodeAt(i)) & 0xFF;
+        x ^= x >> 4;
+        crc = ((crc << 8) ^ (x << 12) ^ (x << 5) ^ x) & 0xFFFF;
+      }
+      return crc.toString(16).toUpperCase().padStart(4, '0');
+    }
+
+    function formatTag(id, val) {
+      const len = val.length.toString().padStart(2, '0');
+      return `${id}${len}${val}`;
+    }
+
+    function injectAmountToRawQR(rawQr, amount) {
+      let tags = {};
+      let index = 0;
+      const fAmount = parseFloat(amount).toFixed(2);
+
+      while (index < rawQr.length) {
+        const id = rawQr.substr(index, 2);
+        const len = parseInt(rawQr.substr(index + 2, 2), 10);
+        const val = rawQr.substr(index + 4, len);
+        tags[id] = val;
+        index += 4 + len;
+      }
+
+      tags["01"] = "12";
+      tags["53"] = "764";
+      tags["54"] = fAmount;
+      tags["58"] = "TH";
+      delete tags["63"];
+
+      let rebuilt = "";
+      for (const key of Object.keys(tags).sort()) {
+        rebuilt += formatTag(key, tags[key]);
+      }
+      rebuilt += "6304";
+      return rebuilt + crc16(rebuilt);
+    }
+
+    function renderQR(amount) {
+      const payload = injectAmountToRawQR(RAW_QR_TEMPLATE, amount);
+      elQrBox.innerHTML = "";
+      qrGenerator = new QRCode(elQrBox, {
+        text: payload,
+        width: 275,
+        height: 275,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    }
+
+    // ==========================================
+    // UNIVERSAL KEYBOARD & TOUCH DISPATCHER
+    // ==========================================
+    function handleAction(key) {
+      initAudio();
+
+      // Normalize Enter key
+      if (key === "NumpadEnter") key = "Enter";
+
+      if (currentState === STATES.IDLE) {
+        playDing();
+        inputBuffer = /\d/.test(key) ? key : "";
+        setScreenState(STATES.INPUT);
+        return;
+      }
+
+      if (currentState === STATES.INPUT) {
+        if (/\d/.test(key)) {
+          if (inputBuffer === "0") inputBuffer = "";
+          if (inputBuffer.length < 5) {
+            inputBuffer += key;
+            elDisplayAmount.innerText = inputBuffer;
+            resetAutoTimeout();
+          }
+        } else if (key === "Backspace") {
+          inputBuffer = inputBuffer.slice(0, -1);
+          elDisplayAmount.innerText = inputBuffer || "0";
+          resetAutoTimeout();
+        } else if (key === "Escape" || key === "Clear") {
+          setScreenState(STATES.IDLE);
+        } else if (key === "Enter") {
+          const num = parseFloat(inputBuffer);
+          if (num > 0) {
+            elPaymentAmountLabel.innerText = `฿${num.toLocaleString('th-TH', { minimumFractionDigits: 2 })}`;
+            renderQR(num);
+            speakAmount(num);
+            setScreenState(STATES.PAYMENT);
+          }
+        }
+        return;
+      }
+
+      if (currentState === STATES.PAYMENT) {
+        if (key === "Enter" || key === "+" || key === "NumpadAdd") {
+          setScreenState(STATES.SUCCESS);
+        } else if (key === "Escape" || key === "Backspace" || key === "Clear") {
+          setScreenState(STATES.IDLE);
+        }
+        return;
+      }
+    }
+
+    // แก้ไข: ดัก Event ระดับ Document เพื่อให้กดติด 100% ไม่หลุด Focus
+    document.addEventListener('keydown', (e) => {
+      // ดักเฉพาะปุ่มที่ใช้งาน ไม่ให้ตีกับระบบ
+      if (/\d/.test(e.key) || ['Enter', 'NumpadEnter', 'Backspace', 'Escape', '+', 'NumpadAdd', 'Clear'].includes(e.key)) {
+        handleAction(e.key);
+      }
+    });
+
+    // Virtual Touch Keypad Event
+    document.querySelectorAll('.vk-btn').forEach(btn => {
+      btn.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const key = btn.getAttribute('data-key');
+        handleAction(key);
+      });
+    });
+
+    // ปุ่มเปิด/ปิด แผง Numpad สำรอง
+    numpadToggle.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      initAudio();
+      numpadPanel.classList.toggle('show');
+    });
+
+    // คลิก/แตะที่หน้าจอเพื่อปลุกระบบเข้าหน้าใส่ยอด
+    window.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('#virtual-numpad-panel') || e.target.closest('#btn-numpad-toggle')) {
+        return;
+      }
+      initAudio();
+      if (currentState === STATES.IDLE) {
+        playDing();
+        setScreenState(STATES.INPUT);
+      }
+    });
+  </script>
+</body>
+</html>
       position: absolute;
       top: 0;
       left: 0;
