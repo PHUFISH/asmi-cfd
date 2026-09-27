@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>อัสมี่ POS รีโมต</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      font-family: 'Prompt', -apple-system, sans-serif;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      background-color: #0b0f19;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* แถบสถานะการเชื่อมต่อ */
+    .top-status {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      font-size: 0.85rem;
+      color: #64748b;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .status-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #e63946;
+      margin-right: 6px;
+    }
+
+    .status-dot.connected {
+      background: #2dc653;
+      box-shadow: 0 0 8px #2dc653;
+    }
+
+    /* จอแสดงตัวเลขที่กดบน iPhone */
+    .display-box {
+      flex: 0 0 110px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 10px 24px;
+      background: #111827;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .display-number {
+      font-size: 4.2rem;
+      font-weight: 800;
+      color: #ffd166;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+
+    .display-unit {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: #94a3b8;
+      margin-left: 10px;
+      margin-bottom: 6px;
+      align-self: flex-end;
+    }
+
+    /* แผง Numpad ยักษ์เต็มจอ iPhone */
+    .numpad-grid {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(4, 1fr);
+      gap: 12px;
+      padding: 14px;
+    }
+
+    .pad-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 18px;
+      color: #ffffff;
+      font-size: 2.2rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      transition: background 0.1s, transform 0.05s;
+    }
+
+    .pad-btn:active {
+      transform: scale(0.94);
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    .btn-clear {
+      color: #ff6b6b;
+      font-size: 1.6rem;
+      font-weight: 700;
+    }
+
+    .btn-bs {
+      color: #fca311;
+      font-size: 1.8rem;
+    }
+
+    /* ปุ่มล่างสุด: ส่งยอด & ชำระสำเร็จ */
+    .action-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 0 14px 20px 14px;
+    }
+
+    .btn-action {
+      height: 60px;
+      border: none;
+      border-radius: 18px;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #ffffff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+      transition: transform 0.05s;
+    }
+
+    .btn-action:active {
+      transform: scale(0.95);
+    }
+
+    .btn-send {
+      background: linear-gradient(135deg, #0077b6, #0096c7);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #1b4332, #2d6a4f);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- แถบบน -->
+  <div class="top-status">
+    <div>
+      <span id="dot" class="status-dot"></span>
+      <span id="status-text">กำลังเชื่อมต่อ...</span>
+    </div>
+    <div>อัสมี่ Terminal</div>
+  </div>
+
+  <!-- จอแสดงผลตัวเลข -->
+  <div class="display-box">
+    <div id="num-display" class="display-number">0</div>
+    <div class="display-unit">บาท</div>
+  </div>
+
+  <!-- แผง Numpad -->
+  <div class="numpad-grid">
+    <button class="pad-btn" onclick="pressNum('7')">7</button>
+    <button class="pad-btn" onclick="pressNum('8')">8</button>
+    <button class="pad-btn" onclick="pressNum('9')">9</button>
+    
+    <button class="pad-btn" onclick="pressNum('4')">4</button>
+    <button class="pad-btn" onclick="pressNum('5')">5</button>
+    <button class="pad-btn" onclick="pressNum('6')">6</button>
+    
+    <button class="pad-btn" onclick="pressNum('1')">1</button>
+    <button class="pad-btn" onclick="pressNum('2')">2</button>
+    <button class="pad-btn" onclick="pressNum('3')">3</button>
+    
+    <button class="pad-btn btn-clear" onclick="pressClear()">C</button>
+    <button class="pad-btn" onclick="pressNum('0')">0</button>
+    <button class="pad-btn btn-bs" onclick="pressBackspace()">⌫</button>
+  </div>
+
+  <!-- ปุ่มกดสั่งงานด่วน -->
+  <div class="action-row">
+    <button class="btn-action btn-send" onclick="sendToiPad()">
+      ยิง QR เข้า iPad
+    </button>
+    <button class="btn-action btn-success" onclick="sendSuccess()">
+      สำเร็จ ✔
+    </button>
+  </div>
+
+  <script>
+    const MQTT_TOPIC = "asmi_cfd_pos_99/command";
+    let currentInput = "0";
+
+    const elDisplay = document.getElementById('num-display');
+    const elDot = document.getElementById('dot');
+    const elStatus = document.getElementById('status-text');
+
+    // เชื่อมต่อ MQTT
+    const client = mqtt.connect('wss://broker.hivemq.com:8884/mqtt');
+
+    client.on('connect', () => {
+      elDot.classList.add('connected');
+      elStatus.innerText = "เชื่อมต่อ iPad พร้อม";
+    });
+
+    client.on('offline', () => {
+      elDot.classList.remove('connected');
+      elStatus.innerText = "หลุดการเชื่อมต่อ";
+    });
+
+    function updateDisplay() {
+      elDisplay.innerText = currentInput;
+    }
+
+    function pressNum(digit) {
+      if (currentInput === "0") {
+        currentInput = digit;
+      } else if (currentInput.length < 5) {
+        currentInput += digit;
+      }
+      updateDisplay();
+    }
+
+    function pressBackspace() {
+      currentInput = currentInput.slice(0, -1);
+      if (currentInput === "") currentInput = "0";
+      updateDisplay();
+    }
+
+    function pressClear() {
+      currentInput = "0";
+      updateDisplay();
+      // ส่งคำสั่งล้างจอ iPad ด้วย
+      client.publish(MQTT_TOPIC, JSON.stringify({ type: "RESET" }));
+    }
+
+    // ส่งยอดเข้า iPad ทันที
+    function sendToiPad() {
+      const amount = parseFloat(currentInput);
+      if (amount > 0) {
+        client.publish(MQTT_TOPIC, JSON.stringify({ 
+          type: "DIRECT_PAY", 
+          amount: amount 
+        }));
+      }
+    }
+
+    // กดว่าลูกค้าจ่ายแล้ว (หน้าจอ iPad เด้ง "ชำระเงินสำเร็จ")
+    function sendSuccess() {
+      client.publish(MQTT_TOPIC, JSON.stringify({ type: "SUCCESS" }));
+      currentInput = "0";
+      updateDisplay();
+    }
+  </script>
+</body>
+</html>
